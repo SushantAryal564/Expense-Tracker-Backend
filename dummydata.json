@@ -1,0 +1,65 @@
+[
+  {
+    "name": "Sushant Aryal",
+    "items": {
+      "Momo": 20,
+      "Brush": 20,
+      "Tooth Paste": 30
+    },
+    "income": 1000
+  },
+  {
+    "name": "Prashhant Aryal",
+    "items": {
+      "Momo": 20,
+      "Brush": 20,
+      "Tooth Paste": 30
+    },
+    "income": 1000
+  },
+  {
+    "name": "Rashmi Dhungana",
+    "items": {
+      "Momo": 20,
+      "Brush": 20,
+      "Tooth Paste": 30
+    },
+    "income": 1000
+  },
+  {
+    "name": "Rockxya Dhungana",
+    "items": {
+      "Momo": 20,
+      "Brush": 20,
+      "Tooth Paste": 30
+    },
+    "income": 1000
+  },
+  {
+    "name": "Santosh Marashini",
+    "items": {
+      "Momo": 20,
+      "Brush": 20,
+      "Tooth Paste": 30
+    },
+    "income": 1000
+  },
+  {
+    "name": "Hem Sharma Aryal",
+    "items": {
+      "Momo": 20,
+      "Brush": 20,
+      "Tooth Paste": 30
+    },
+    "income": 1000
+  },
+  {
+    "name": "Gita Kumari Sharma Aryal",
+    "items": {
+      "Momo": 20,
+      "Brush": 20,
+      "Tooth Paste": 30
+    },
+    "income": 1000
+  }
+]
