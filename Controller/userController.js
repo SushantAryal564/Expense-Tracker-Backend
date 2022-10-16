@@ -1,5 +1,5 @@
 const fs = require("fs");
-const user = JSON.parse(fs.readFileSync(`${__dirname}/../dummydata.json`));
+const user = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/users.json`));
 exports.checkId = (req, res, next, val) => {
   if (req.params.id * 1 > user.length) {
     return res.status(404).json({
@@ -10,7 +10,7 @@ exports.checkId = (req, res, next, val) => {
   next();
 };
 exports.checkBody = (req, res, next) => {
-  if (!req.body.name || !req.body.Age) {
+  if (!req.body.name) {
     return res.status(404).json({
       status: "fail",
       message: "Missing name or age",
