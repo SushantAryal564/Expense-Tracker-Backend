@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const expenseSchema = mongoose.Schema({
-  user: Number,
+  user: mongoose.Schema.ObjectId,
   product: {
     type: String,
     required: [true, "To add to expense product should have name"],
