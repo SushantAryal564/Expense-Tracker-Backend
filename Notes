@@ -1,0 +1,141 @@
+3. What is Mongoose?
+   Mongoose is an object Data Modeling library for mongodb and node.js a higher level of abstraction. Express is an layer of abstraction over node.js whereas mongoose is an layer of abstraction over mongodb.
+   object Data Modeling library is a way for us to write javascript code that will then interact with database.
+   Mongooose give us lot more functionality out of the box allow for rapid and simple develoddpment of mongoDB databse interactions.
+   Features: Schemas to model data and relationship, easy data validation, simple query API, middleware etc.
+   Mongoose schema: Where we model our data, by describing the structure of the data, default values and validation.
+   Mongoose Model: a wrapper for the schema, providing an interface to the database for CRUD operations.
+
+4. Creating a simple Tour Model
+   MOngoose is all about model which is like a blueprint we use to create documents. It is like a classes in the javascript from which we create object out of them.
+   We create a model in mongoose in order to create document using it, and also to query update and delete these documents. To perform each of the CRUD operation we need a MONGOOSE model. We create a model from the mongoose schema.
+   creating a new Schema in mongoose:
+   const tourSchema = new mongoose.Schema({
+   name:String,
+   rating:Number,
+    price:Number,
+   })
+
+5. Intro to Back end architecture MVC, Types of Logic and More
+   MVC(Model View Controller) where:
+   Model: Business Logic (Concerned with application data and bussiness logic)
+   Controller: Application Logic (The function of controller is to handle the application request interact with model and send back response to client.)
+   View: Presentation Logic (If we have graphical interface in app.)
+   using this architecture allow us to write modular appliation which is more easier to model or scale.
+   One of the major role of MVC is to seperate Application logic and Business Logic.
+   Application Logic:
+   Code that is only concerned about the application's implementation not the underlying business problem.
+   concerned about managing request and response.
+   About the app's more technical aspects.
+   Bridge between model and view layers.
+
+   Business Logic
+   Code that actually solves the business problem we set out to solve.
+   Directly related to business rules, how the business works and business needs.
+   Examples:
+   creating new tours in database.
+   Checking if user's password is correct.
+   Validating user input data.
+   Ensuring only user who bought a tour can review it.
+
+   We must be sure that our application logic is in Controller where as our business logic in the model.
+   Fat model/ thin controller: Offload as much logic as possible into the models, adn keep the controllers as simple and lean as possible.
+
+6. Another Way of Creating Documents
+   exports.createTour = async(req,res)=>{
+    <!-- const newTour = new tour({});
+    newTour.save(); -->
+
+   We can use Tour model directly as well and call the create method on it into that function we pass the data that we want to store in the databse as a new tour.
+   If the field are not in the schema they aren't put in the database. Everthing that are not in schema aren't put in the database.
+
+7. Reading Documents
+
+8. Updating Documents
+   Model.prototype.save() which means an object created from the class. save method is called on the document.
+
+9. Modelling the Tours
+   summery:{
+   type: String,
+   trim: true,
+   }
+   trim removes the white space at beginning and the end of the document.
+
+10. Making the API Better Filtering
+    In mongoose we have two way to write a database query.
+    The first one is to use filter object.
+    the second way is special mongoose method.
+    We could have other functionality like sort for sorting functionality, page for pagination so we need to make sure we aren't querying for these in our database cause we want to use it only to implement pagination not to query in database so we need to exclude this special query string before we can do filtering.
+    const query = Tour.find(queryObj);
+    Here find method return an query.But as soon as we await the query will then execute and come back with an document that match our query. so we cannto implement sorting and pagination and other feature. so we need to save it as a query.
+    const tours = await query;
+11. Making the API Better Advanced Filtering
+    Query string with operator:
+    127.0.0.1:3000/api/v1/tours?duration[gte]=5&difficulty=easy
+
+12. Making the API better Limiting Fields
+    The process of selecting only certain field name is called projecting.
+    if(req.query.fields){
+    const fields = req.query.fields.split(",").join(" ");
+
+    }
+
+13. Making the API Better Pagination
+    good api should provide pagination allowing user to select result from certain page if we have lots of result.
+    127.0.0.1:3000/api/v1/tours?page=1&limit=5
+
+14. Making the API better Aliasing
+    We can provide an alias route to a request that might be vary popular which could be requested all the time.
+
+15. Refactoring API Feature
+
+16. Aggregation Pipeline Matching and Grouping
+    Aggreation pipeline ia an important mongodb framework for data aggregation. We define a pipeline that all the document from a certain collection go through where they are processed step by step in order to transform them into aggregrated results.
+    Aggregration pipeline is an feature of an mongoDb but we mongoosh also give the access to it so we can use it in the Mongoose driver.
+    Match: It is basically to select or to filter certain document. It is very similar to filter object in mongoDb. Match stage is just a priliminary stage to then prepare for the next stage to come.
+    group: It allows us to group documents together, basically using accumulators.
+
+17. Aggregration Pipeline Unwinding and Projecting
+    We solve real business problem.
+    unwindling: Unwind basically deconstruct an array field from input document and then output one document for each element of the array.
+    Mongo is perfect for working with date like doing date comparision.
+18. Virtual Properties
+    Virtual properties are basically the field that we can define on our schema that will not be persisted. It will not be saved into the database in order to save us some space. It can be very useful for field that can be derived from one another. In virtual properties we need to define the get method as it is created each time that we get some data out of the database.
+
+19. Document middleware
+    Mongoose also have a concept of middleware. We can use mongoosh middleware to make something happen between two event for example each time a document is saved to the database we can run a function between save command is issued and the actual saving of the doucment or after the actual saving. Mongoosh middleware is also called pre and post hook as we cand define a function to run before and after a certain event like saving a document. It is a fundamental concept in mongoosh. There are four type of middleware in mongoosh:
+    1. Document 
+    2. Query
+    3. aggregrated
+    4. Model
+
+    Document Middleware which is the middleware which can act on the currently processed document. Just like Express we have next function in mongoosh middleware to call next middleware in the stack.
+    Each middleware function in a pre save middleware has access to next. 
+    Document MIddleware runs before .save() and .create()
+    .post has access to next and document that has been just saved. It is executed after .pre middleware are completed. 
+    .pre has access to next.
+    We can have multiple pre and post middleware for the same hook.
+    We can have middleware running before and after certain event in case of document middleware that is save event. In the case of document middleware this keyword means currently saving document. 
+    It can also run for save, remove, validate. 
+
+20. Query Middleware
+    Query Middleware allows us to execute the function before and after a certain query is executed. 
+    pre-find hook: a middleaware that is gonna run before any find query is executed. 
+    "find" this make the middlewarer a query middleware not a document middleware. this keyword now will point at the current query.
+    In case of query middleware before the query is executed the pre find middleware is executed. In case of Query Middleware the this middleware points to query so in which we can again chain another find method and filter out certain things. 
+    This will work for the command with the find but not with the findbyId.so we also need to specify the middleware for findOne.
+    It can run for count deletemany, deleteone, find, findone, findMany etc. 
+    .post => In post find middleware we get access to all documents that we returned from the query. This middleware is executed after the query is executed so it can have access to the document query has returned. 
+
+21. Aggregration Middleware
+     It allows us to use apply hook before and after the aggregration happen. 
+     this points to the current aggregation object. 
+
+22. Data Validation Built-in Validation
+    Validation is basically checking the input value are in right format in our document schema, and also that values have been entered for all of the required fields. Sanitization which is to ensure that the inputted data is clean, so there is no malicious code being injected to our database or into the application itself. It is a crucial step never ever accept the input data as it is so we need to sanitize the data coming in. Fat model and thin controller so data validation is done in the model. Mongoosh already come with various validation tools out of the box. Here required: is a kind of data validator in schema type option. 
+
+23. Data validation Custom validators
+    Sometimes builtin validators are not enough in such case we can create our own custom validators. Validator is a simple function that should return true or false. 
+    In validator function this only works the document which going to be posted but not on the upgrade. 
+    There are various third party package for the validation on of them is validator which is very popular a string validator and sanitizer.
+    

@@ -25,6 +25,12 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  age: {
+    type: Number,
+    max: 110,
+    min: 0,
+    required: [true, "Please enter user age"],
+  },
 });
 const User = mongoose.model("User", userSchema);
 module.exports = User;

@@ -1,6 +1,7 @@
 const express = require("express");
 const Router = express.Router();
 const expenseController = require("./../Controller/expenseController");
+Router.route("/expenseStats").get(expenseController.getExpenseStats);
 Router.route("/expensiveExpenses").get(
   expenseController.aliasTopExpenses,
   expenseController.getAllExpenses

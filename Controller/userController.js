@@ -1,6 +1,10 @@
 const { findByIdAndUpdate } = require("./../Model/usersModel");
 const User = require("./../Model/usersModel");
-
+exports.aliasNewUser = (req, res, next) => {
+  req.query.sort = "created_at";
+  req.query.limit = "3";
+  next();
+};
 exports.getAllUser = async (req, res) => {
   try {
     /// Simple Filtering
@@ -109,4 +113,28 @@ exports.deleteUser = (req, res) => {
     status: "success",
     data: null,
   });
+};
+exports.getuserStats = async (req, res) => {
+  try {
+    console.log("Hi I am here");
+    const userStat = await User.aggregate([
+      {
+        $group: {
+          _id: null,
+          TotalUser: { $sum: 1 },
+        },
+      },
+    ]);
+    res.status(200).json({
+      status: "success",
+      data: {
+        userStat,
+      },
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
 };

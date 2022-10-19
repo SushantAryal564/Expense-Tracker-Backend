@@ -1,49 +1,21 @@
 const User = require("../Model/usersModel");
+const APIFeatures = require("./../utils/apiFeatures");
 const Expense = require("./../Model/expensesModel");
 exports.aliasTopExpenses = (req, res, next) => {
-  req.query.limit = 5;
-  req.query.find = "sort=price";
+  req.query.limit = "5";
+  req.query.sort = "price";
   req.query.fields = "user,product,price";
   next();
 };
+
 exports.getAllExpenses = async (req, res) => {
   try {
-    // Simple Filtering
-    const queryObj = { ...req.query };
-    const excludeField = ["page", "sort", "limit", "filed"];
-    excludeField.forEach((el) => delete queryObj[el]);
-    // Advance Filtering
-    let queryString = JSON.stringify(queryObj);
-    queryString = queryString.replace(
-      /\b(gte|gt|lte|lt)\b/g,
-      (match) => `$${match}`
-    );
-    queryString = JSON.parse(queryString);
-    let query = Expense.find(queryString);
-    // Sorting
-    if (req.query.sort) {
-      const sortby = req.query.sort.split(",").join(" ");
-      query.sort(sortby);
-    } else {
-      query.sort("-price");
-    }
-    // Limiting
-    if (req.query.fields) {
-      const limitTo = req.query.fields.split(",").join(" ");
-      query.select(limitTo);
-    } else {
-      query.select("-__v");
-    }
-    // Pagination
-    const page = req.query.page * 1 || 1;
-    const limit = req.query.limit * 1 || 10;
-    const skip = (page - 1) * limit;
-    query = query.skip(skip).limit(limit);
-    if (req.query.page) {
-      const numExpenses = await User.countDocuments();
-      if (skip >= numExpenses) throw new Error("This page doesn't exists.");
-    }
-    const expenses = await query;
+    const feature = new APIFeatures(Expense.find(), req.query)
+      .filter()
+      .sort()
+      .limitField()
+      .pagination();
+    const expenses = await feature.query;
     res.status(200).json({
       status: "success",
       totalResult: expenses.length,
@@ -129,6 +101,36 @@ exports.createExpense = async (req, res) => {
     res.status(400).json({
       status: "fail",
       message: "Invalid data sent.",
+    });
+  }
+};
+exports.getExpenseStats = async (req, res) => {
+  try {
+    const ExpenseStats = await Expense.aggregate([
+      {
+        $group: {
+          _id: "$user",
+          num: { $sum: 1 },
+          totalExpense: { $sum: "$price" },
+          miniumExpense: { $min: "$price" },
+          maximumExpense: { $max: "$price" },
+          averageExpense: { $avg: "$price" },
+        },
+      },
+      {
+        $sort: {
+          miniumExpense: -1,
+        },
+      },
+    ]);
+    res.status(200).json({
+      status: "success",
+      ExpenseStats,
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: "fail",
+      message: err.message,
     });
   }
 };
