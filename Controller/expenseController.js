@@ -2,7 +2,7 @@ const User = require("../Model/usersModel");
 const APIFeatures = require("./../utils/apiFeatures");
 const Expense = require("./../Model/expensesModel");
 exports.aliasTopExpenses = (req, res, next) => {
-  req.query.limit = "5";
+  req.query.limit = 5;
   req.query.sort = "price";
   req.query.fields = "user,product,price";
   next();
@@ -18,25 +18,25 @@ exports.getAllExpenses = async (req, res) => {
     const expenses = await feature.query;
     res.status(200).json({
       status: "success",
-      totalResult: expenses.length,
+      result: expenses.length,
       data: {
         expenses,
       },
     });
-  } catch (err) {
+  } catch (error) {
     res.status(400).json({
       status: "fail",
-      message: err.message,
+      message: error.message,
     });
   }
 };
 exports.getExpensesById = async (req, res) => {
   try {
-    const user = await Expense.findById(req.param.id);
+    const expense = await Expense.findById(req.param.id);
     res.status(200).json({
       status: "success",
       data: {
-        user,
+        expense,
       },
     });
   } catch (error) {

@@ -8,13 +8,12 @@ class APIFeatures {
     const excludeField = ["page", "sort", "limit", "filed"];
     excludeField.forEach((el) => delete queryObj[el]);
     // Advance Filtering
-    this.queryString = JSON.stringify(queryObj);
-    this.queryString = this.queryString.replace(
+    let queryString = JSON.stringify(queryObj);
+    queryString = queryString.replace(
       /\b(gte|gt|lte|lt)\b/g,
       (match) => `$${match}`
     );
-    this.queryString = JSON.parse(this.queryString);
-    this.query = this.query.find(this.queryString);
+    this.query = this.query.find(JSON.parse(queryString));
     return this;
   }
   sort() {
