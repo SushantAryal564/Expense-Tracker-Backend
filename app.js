@@ -3,6 +3,8 @@ const app = express();
 const morgan = require("morgan");
 const userRouter = require("./Routes/userRoute");
 const expenseRouter = require("./Routes/expenseRoute");
+const appError = require("./utils/appError");
+const globalErrorHandler = require("./Controller/errorController");
 if (process.env.NODE_ENV == "developement") {
   app.use(morgan("dev"));
 }
@@ -22,10 +24,9 @@ app.use("/api/user", userRouter);
 
 // To handle all other URL
 app.all("*", (req, res, next) => {
-  res.status(404).json({
-    status: "fail",
-    message: `can't find ${req.originalUrl} on this server.`,
-  });
+  next(new appError(`Can't find ${req.originalUrl} on this server.`, 404));
 });
+
+app.use(globalErrorHandler);
 
 module.exports = app;
