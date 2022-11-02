@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
+const bcrypt = require("bcryptjs");
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -23,6 +24,12 @@ const userSchema = new mongoose.Schema(
     passwordConfirm: {
       type: String,
       required: [true, "Please confirm your password"],
+      validate: {
+        validator: function (val) {
+          return val === this.password;
+        },
+        message: "Passwords aren't same",
+      },
     },
     created_at: {
       type: Date,
@@ -38,6 +45,7 @@ const userSchema = new mongoose.Schema(
         message: "Age shoudl be greater than 0 and less than 110",
       },
     },
+    photo: String,
   },
   {
     toJSON: { virtuals: true },
@@ -52,6 +60,12 @@ userSchema.virtual("UserSince").get(function () {
 // Document Middleware
 userSchema.pre("save", function (next) {
   this.slug = slugify(this.name, { lower: true });
+  next();
+});
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 12);
+  this.passwordConfirm = undefined;
   next();
 });
 const User = mongoose.model("User", userSchema);
