@@ -1,4 +1,5 @@
 const APIFeatures = require("../utils/apiFeatures");
+const appError = require("../utils/appError");
 const User = require("./../Model/usersModel");
 const catchAsync = require("./../utils/catchAsync");
 exports.aliasNewUser = (req, res, next) => {
@@ -21,8 +22,11 @@ exports.getAllUser = catchAsync(async (req, res) => {
     },
   });
 });
-exports.getUserById = catchAsync(async (req, res) => {
+exports.getUserById = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.params.id);
+  if (!user) {
+    return next(new appError("Invalid ID please enter a valid ID", 404));
+  }
   res.status(200).json({
     status: "success",
     data: {
@@ -40,11 +44,14 @@ exports.createNewUser = catchAsync(async (req, res) => {
     },
   });
 });
-exports.updateUser = catchAsync(async (req, res) => {
+exports.updateUser = catchAsync(async (req, res, next) => {
   const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
     runValidators: true,
     new: true,
   });
+  if (!updatedUser) {
+    return next(new appError("Invalid Id cannot find the requested ID", 404));
+  }
   res.status(200).json({
     status: "success",
     data: {
@@ -52,6 +59,7 @@ exports.updateUser = catchAsync(async (req, res) => {
     },
   });
 });
+
 exports.deleteUser = (req, res) => {
   res.status(204).json({
     status: "success",
@@ -59,7 +67,6 @@ exports.deleteUser = (req, res) => {
   });
 };
 exports.getuserStats = catchAsync(async (req, res) => {
-  console.log("Hi I am here");
   const userStat = await User.aggregate([
     {
       $group: {

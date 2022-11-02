@@ -38,6 +38,7 @@ exports.getExpensesById = catchAsync(async (req, res, next) => {
     },
   });
 });
+
 exports.deleteExpense = catchAsync(async (req, res, next) => {
   const expense = await Expense.findByIdAndDelete(req.params.id);
   if (!expense) {
@@ -48,6 +49,7 @@ exports.deleteExpense = catchAsync(async (req, res, next) => {
     data: null,
   });
 });
+
 exports.updateExpense = catchAsync(async (req, res, next) => {
   console.log(req.params.id, req.body);
   const updateExpense = await Expense.findByIdAndUpdate(
@@ -68,6 +70,7 @@ exports.updateExpense = catchAsync(async (req, res, next) => {
     },
   });
 });
+
 exports.createExpense = catchAsync(async (req, res, next) => {
   const newExpense = await Expense.create(req.body);
   // this is similar to
@@ -80,6 +83,7 @@ exports.createExpense = catchAsync(async (req, res, next) => {
     },
   });
 });
+
 exports.getExpenseStats = catchAsync(async (req, res, next) => {
   const ExpenseStats = await Expense.aggregate([
     {

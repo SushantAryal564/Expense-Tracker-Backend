@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema(
       required: [true, "Please enter user age"],
       validate: {
         validator: function (val) {
-          return val > 110 && val < 0;
+          return val > 0 && val < 100;
         },
         message: "Age shoudl be greater than 0 and less than 110",
       },
