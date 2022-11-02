@@ -1,6 +1,9 @@
 const User = require("../Model/usersModel");
 const APIFeatures = require("./../utils/apiFeatures");
 const Expense = require("./../Model/expensesModel");
+const catchAsync = require("./../utils/catchAsync.js");
+const appError = require("./../utils/appError");
+
 exports.aliasTopExpenses = (req, res, next) => {
   req.query.limit = 5;
   req.query.sort = "price";
@@ -8,129 +11,95 @@ exports.aliasTopExpenses = (req, res, next) => {
   next();
 };
 
-exports.getAllExpenses = async (req, res) => {
-  try {
-    const feature = new APIFeatures(Expense.find(), req.query)
-      .filter()
-      .sort()
-      .limitField()
-      .pagination();
-    const expenses = await feature.query;
-    res.status(200).json({
-      status: "success",
-      result: expenses.length,
-      data: {
-        expenses,
-      },
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: error.message,
-    });
+exports.getAllExpenses = catchAsync(async (req, res, next) => {
+  const feature = new APIFeatures(Expense.find(), req.query)
+    .filter()
+    .sort()
+    .limitField()
+    .pagination();
+  const expenses = await feature.query;
+  res.status(200).json({
+    status: "success",
+    result: expenses.length,
+    data: {
+      expenses,
+    },
+  });
+});
+exports.getExpensesById = catchAsync(async (req, res, next) => {
+  const expense = await Expense.findById(req.params.id);
+  if (!expense) {
+    return next(new appError("Invalid request there is no requested ID", 404));
   }
-};
-exports.getExpensesById = async (req, res) => {
-  try {
-    const expense = await Expense.findById(req.param.id);
-    res.status(200).json({
-      status: "success",
-      data: {
-        expense,
-      },
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: error.message,
-    });
+  res.status(200).json({
+    status: "success",
+    data: {
+      expense,
+    },
+  });
+});
+exports.deleteExpense = catchAsync(async (req, res, next) => {
+  const expense = await Expense.findByIdAndDelete(req.params.id);
+  if (!expense) {
+    return next(new appError("Invalid request there is no requested ID", 404));
   }
-};
-exports.deleteExpense = async (req, res) => {
-  try {
-    await Expense.findByIdAndDelete(req.params.id);
-    res.status(204).json({
-      status: "success",
-      data: null,
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: "fail",
-      message: error,
-    });
+  res.status(204).json({
+    status: "success",
+    data: null,
+  });
+});
+exports.updateExpense = catchAsync(async (req, res, next) => {
+  console.log(req.params.id, req.body);
+  const updateExpense = await Expense.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    {
+      runValidators: true,
+      new: true,
+    }
+  );
+  if (!updateExpense) {
+    return next(new appError("Invalid request there is no requested ID", 404));
   }
-};
-exports.updateExpense = async (req, res) => {
-  try {
-    console.log(req.params.id, req.body);
-    const updateExpense = await Expense.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        runValidators: true,
-        new: true,
-      }
-    );
-    res.status(200).json({
-      status: "success",
-      data: {
-        updateExpense,
+  res.status(200).json({
+    status: "success",
+    data: {
+      updateExpense,
+    },
+  });
+});
+exports.createExpense = catchAsync(async (req, res, next) => {
+  const newExpense = await Expense.create(req.body);
+  // this is similar to
+  // const newExpense = new Expense({});
+  // newExpense.save();
+  res.status(201).json({
+    status: "success",
+    data: {
+      expense: newExpense,
+    },
+  });
+});
+exports.getExpenseStats = catchAsync(async (req, res, next) => {
+  const ExpenseStats = await Expense.aggregate([
+    {
+      $group: {
+        _id: "$user",
+        num: { $sum: 1 },
+        totalExpense: { $sum: "$price" },
+        miniumExpense: { $min: "$price" },
+        maximumExpense: { $max: "$price" },
+        averageExpense: { $avg: "$price" },
       },
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: "fail",
-      message: error,
-    });
-  }
-};
-exports.createExpense = async (req, res) => {
-  try {
-    console.log(req.body);
-    const newExpense = await Expense.create(req.body);
-    // this is similar to
-    // const newExpense = new Expense({});
-    // newExpense.save();
-    res.status(201).json({
-      status: "success",
-      data: {
-        expense: newExpense,
+    },
+    {
+      $sort: {
+        miniumExpense: -1,
       },
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: "Invalid data sent.",
-    });
-  }
-};
-exports.getExpenseStats = async (req, res) => {
-  try {
-    const ExpenseStats = await Expense.aggregate([
-      {
-        $group: {
-          _id: "$user",
-          num: { $sum: 1 },
-          totalExpense: { $sum: "$price" },
-          miniumExpense: { $min: "$price" },
-          maximumExpense: { $max: "$price" },
-          averageExpense: { $avg: "$price" },
-        },
-      },
-      {
-        $sort: {
-          miniumExpense: -1,
-        },
-      },
-    ]);
-    res.status(200).json({
-      status: "success",
-      ExpenseStats,
-    });
-  } catch (err) {
-    res.status(400).json({
-      status: "fail",
-      message: err.message,
-    });
-  }
-};
+    },
+  ]);
+  res.status(200).json({
+    status: "success",
+    ExpenseStats,
+  });
+});
