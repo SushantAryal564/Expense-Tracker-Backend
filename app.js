@@ -16,6 +16,7 @@ app.use(express.json());
 app.use((req, res, next) => {
   const date = new Date().toISOString();
   req.date = date;
+  console.log(req.headers);
   next();
 });
 
