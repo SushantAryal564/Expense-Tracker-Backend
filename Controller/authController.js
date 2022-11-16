@@ -26,7 +26,6 @@ exports.signUp = catchAsync(async (req, res, next) => {
   });
 });
 exports.login = catchAsync(async (req, res, next) => {
-  console.log("Hi I am here");
   const { email, password } = req.body;
   if (!email || !password) {
     return next(new appError("Please enter email and passowrd", 400));
@@ -61,7 +60,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   );
 
   // 3) Check if user still exists
-  const freshUser = await findById(decoded.id);
+  const freshUser = await User.findById(decoded.id);
   if (!freshUser) {
     new appError(
       "The user beloniging to this token doesn't longer exists.",
@@ -76,3 +75,14 @@ exports.protect = catchAsync(async (req, res, next) => {
   req.user = freshUser;
   next();
 });
+
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.roles)) {
+      return next(
+        new appError("You don't have permission to perform this action", 403)
+      );
+    }
+    next();
+  };
+};
