@@ -6,6 +6,9 @@ const authController = require("./../Controller/authController");
 Router.post("/signup", authController.signUp);
 Router.post("/login", authController.login);
 
+Router.post("/forgetPassword", authController.forgetPassword);
+Router.patch("/resetPassword/:token", authController.resetPassword);
+
 Router.route("/userStats").get(userController.getuserStats);
 Router.route("/newUsers").get(
   userController.aliasNewUser,
@@ -19,7 +22,7 @@ Router.route("/:id")
   .patch(userController.updateUser)
   .delete(
     authController.protect,
-    authController.restrictTo("admin", "user"),
+    authController.restrictTo("admin"),
     userController.deleteUser
   );
 
