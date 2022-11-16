@@ -3,6 +3,7 @@ const User = require("./../Model/usersModel");
 const jwt = require("jsonwebtoken");
 const { promisify } = require("util");
 const appError = require("./../utils/appError");
+const { findById } = require("./../Model/usersModel");
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JSON_WEBTOKEN_SECRET, {
     expiresIn: process.env.JSON_WEBTOKEN_EXPIRES,
@@ -25,6 +26,7 @@ exports.signUp = catchAsync(async (req, res, next) => {
   });
 });
 exports.login = catchAsync(async (req, res, next) => {
+  console.log("Hi I am here");
   const { email, password } = req.body;
   if (!email || !password) {
     return next(new appError("Please enter email and passowrd", 400));
@@ -59,6 +61,18 @@ exports.protect = catchAsync(async (req, res, next) => {
   );
 
   // 3) Check if user still exists
+  const freshUser = await findById(decoded.id);
+  if (!freshUser) {
+    new appError(
+      "The user beloniging to this token doesn't longer exists.",
+      401
+    );
+  }
   // 4) Check if use changed password after the token was issued
+  if (freshUser.changedPasswordAfter(decoded.iat)) {
+    new appError("User recently changed password! Please log in again", 401);
+  }
+  // Grant access
+  req.user = freshUser;
   next();
 });

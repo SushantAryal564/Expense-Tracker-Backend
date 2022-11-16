@@ -15,6 +15,12 @@ const handleVatidatorError = (err) => {
   const error = new appError(err.message, 400);
   return error;
 };
+const handleJWTError = () => {
+  return new appError("Invalid token. Please log in again", 401);
+};
+const handleJWTExpiredError = () => {
+  return new App("Your token has expired! Please login again", 401);
+};
 const devError = (res, err) => {
   res.status(err.statusCode).json({
     error: err,
@@ -32,7 +38,7 @@ const proError = (res, err) => {
   } else {
     res.status(500).json({
       status: "error",
-      message: err,
+      message: "something went very wrong",
     });
   }
 };
@@ -50,5 +56,7 @@ module.exports = (err, req, res, next) => {
     if (err.code == 11000) err = handleDublicateError(err);
     if ((err.name = "ValidatorError")) err = handleVatidatorError(err);
     proError(res, err);
+    if (err.name == "JsonWebTokenError") err = handleJWTError(err);
+    if (err.name == "TokenExpiredError") err = handleJWTExpiredError(err);
   }
 };
